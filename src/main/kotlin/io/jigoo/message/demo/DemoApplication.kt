@@ -15,17 +15,4 @@ fun main(args: Array<String>) {
 }
 
 @SpringBootApplication
-@LineMessageHandler
-class Application {
-    @EventMapping
-    fun handleTextMessageEvent(event: MessageEvent<TextMessageContent>): Message {
-        println("event: $event")
-        val originalMessageText = event.message.text
-        return TextMessage(originalMessageText)
-    }
-
-    @EventMapping
-    fun handleDefaultMessageEvent(event: Event) {
-        println("event: $event")
-    }
-}
+class Application

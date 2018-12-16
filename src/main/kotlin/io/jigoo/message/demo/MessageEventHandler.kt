@@ -6,9 +6,11 @@ import com.linecorp.bot.model.event.message.TextMessageContent
 import com.linecorp.bot.model.message.Message
 import com.linecorp.bot.model.message.TextMessage
 import com.linecorp.bot.spring.boot.annotation.EventMapping
+import com.linecorp.bot.spring.boot.annotation.LineMessageHandler
 import org.springframework.stereotype.Service
 
 @Service
+@LineMessageHandler
 class MessageEventHandler(private val actionDispatcher: ActionDispatcher) {
 
     @EventMapping

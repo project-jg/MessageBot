@@ -5,6 +5,10 @@ import com.linecorp.bot.model.event.message.TextMessageContent
 import org.springframework.data.repository.CrudRepository
 import org.springframework.stereotype.Repository
 import org.springframework.stereotype.Service
+import javax.persistence.Entity
+import javax.persistence.GeneratedValue
+import javax.persistence.GenerationType
+import javax.persistence.Id
 
 enum class Action {
     TEAM_INIT,
@@ -39,14 +43,18 @@ class TeamInitActionHandler(private val teamInitRepository: TeamInitRepository) 
         val userId = event.source.userId
 
         //TODO 팀과 유저아이디를 스토리지에 저장한다
-        teamInitRepository.save(Team(userId, teamName))
+        teamInitRepository.save(Team(null, userId, teamName))
 
         //TODO 답장을 보내준다
     }
 }
 
 @Repository
-interface TeamInitRepository : CrudRepository<Team, String> {
-}
+interface TeamInitRepository : CrudRepository<Team, String>
 
-data class Team(val userId: String, val teamName: TeamNames)
+@Entity
+data class Team(
+        @Id @GeneratedValue(strategy = GenerationType.AUTO) val id: Int?,
+        val userId: String,
+        val teamName: TeamNames)
+
