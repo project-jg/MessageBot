@@ -21,8 +21,9 @@ enum class TeamNames {
 }
 
 @Service
-class ActionDispatcher(private val teamInitActionHandler: TeamInitActionHandler) {
-    fun dispatch(event: MessageEvent<TextMessageContent>) = teamInitActionHandler.handle(event)
+class ActionDispatcher(private val teamInitActionHandler: TeamInitActionHandler, private val numberActionHandler: NumberActionHandler) {
+    fun dispatch(event: MessageEvent<TextMessageContent>) =
+        if (event.message.text.toIntOrNull() == null) teamInitActionHandler.handle(event) else numberActionHandler.handle(event)
 }
 
 interface ActionHandler {
