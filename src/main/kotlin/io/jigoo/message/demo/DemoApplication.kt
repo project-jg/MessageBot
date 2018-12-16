@@ -10,8 +10,6 @@ import com.linecorp.bot.model.message.Message
 import org.springframework.boot.SpringApplication
 import com.linecorp.bot.spring.boot.annotation.LineMessageHandler
 
-
-
 fun main(args: Array<String>) {
     SpringApplication.run(Application::class.java, *args)
 }
