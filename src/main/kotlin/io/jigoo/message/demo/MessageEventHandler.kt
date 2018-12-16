@@ -18,10 +18,9 @@ class MessageEventHandler(private val actionDispatcher: ActionDispatcher) {
         println("event: $event")
 
         return try {
-            actionDispatcher.dispatch(event)
-            TextMessage("안녕하세요")
+            TextMessage(actionDispatcher.dispatch(event))
         } catch (e: Exception) {
-            TextMessage("잘못된 요청입니다")
+            TextMessage(e.message)
         }
     }
 
