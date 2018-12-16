@@ -47,7 +47,11 @@ class TeamInitActionHandler(private val teamInitRepository: TeamInitRepository) 
 }
 
 @Service
-class NumberActionHandler(private val teamInitRepository: TeamInitRepository) : ActionHandler {
+class NumberActionHandler(
+    private val teamInitRepository: TeamInitRepository,
+    private val gameRepository: GameRepository,
+    private val gameConfigRepository: GameConfigRepository
+) : ActionHandler {
 
 
     /*
@@ -59,36 +63,50 @@ class NumberActionHandler(private val teamInitRepository: TeamInitRepository) : 
      */
     override fun handle(event: MessageEvent<TextMessageContent>): String {
         val team = teamInitRepository.findByUserId(event.source.userId)
-        return team.teamName.toString()
-        // team?.let {  }
+
+        return team?.teamName?.let {
+            gameRepository.save(
+                Game(
+                    teamName = it,
+                    selected = event.message.text.toIntOrNull() ?: throw RuntimeException("잘못입력했음"),
+                    turn = gameConfigRepository.findAll().first()?.currentTurn ?: throw RuntimeException("게임 없음")
+                )
+            )
+        }?.let { "${it.selected} 를 선택하셨네요" } ?: throw RuntimeException("팀 선택을 안했음")
     }
 }
 
 @Repository
-interface TeamInitRepository : CrudRepository<Team, String> {
-    fun findByUserId(userId: String): Team
+interface TeamInitRepository : CrudRepository<Team, Int> {
+    fun findByUserId(userId: String): Team?
     fun findByTeamName(teamName: TeamNames): Team?
 }
 
+@Repository
+interface GameRepository : CrudRepository<Game, Int>
+
+@Repository
+interface GameConfigRepository : CrudRepository<GameConfig, Int>
+
 @Entity
 data class Team(
-        @Id @GeneratedValue(strategy = GenerationType.AUTO) val id: Int? = null,
-        @Column(unique = true) val teamName: TeamNames,
-        val userId: String
+    @Id @GeneratedValue(strategy = GenerationType.AUTO) val id: Int? = null,
+    @Column(unique = true) val teamName: TeamNames,
+    @Column(unique = true) val userId: String
 )
 
 @Entity
 data class GameConfig(
-        @Id val id: Int = 0,
-        val currentTurn: Int,
-        val answer: Int
+    @Id val id: Int = 0,
+    @Column(unique = true) val currentTurn: Int,
+    val answer: Int
 )
 
 @Entity
 data class Game(
-        @Id @GeneratedValue(strategy = GenerationType.AUTO) val id: Int?,
-        val teamName: TeamNames,
-        val turn: Int,
-        val selected: Int
+    @Id @GeneratedValue(strategy = GenerationType.AUTO) val id: Int? = null,
+    val teamName: TeamNames,
+    val turn: Int,
+    val selected: Int
 )
 
