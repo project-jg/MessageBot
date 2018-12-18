@@ -21,12 +21,13 @@ enum class TeamName(val info: String) {
 }
 
 @Service
-class ActionDispatcher(private val teamInitActionHandler: TeamInitActionHandler, private val numberActionHandler: NumberActionHandler) {
-    fun dispatch(event: MessageEvent<TextMessageContent>) =
-        if (event.message.text.toIntOrNull() == null)
-            teamInitActionHandler.handle(event)
-        else
-            numberActionHandler.handle(event)
+class ActionDispatcher(private val teamInitActionHandler: TeamInitActionHandler, private val answerActionHandler: AnserActionHandler) {
+    fun dispatch(event: MessageEvent<TextMessageContent>) = try {
+        TeamName.valueOf(event.message.text.toUpperCase())
+        teamInitActionHandler.handle(event)
+    } catch (e: Exception) {
+        answerActionHandler.handle(event)
+    }
 }
 
 interface ActionHandler {
@@ -58,7 +59,7 @@ class TeamInitActionHandler(
 
 
 @Service
-class NumberActionHandler(
+class AnserActionHandler(
     private val teamInitRepository: TeamInitRepository,
     private val gameService: GameService,
     private val gameConfigService: GameConfigService
@@ -70,7 +71,7 @@ class NumberActionHandler(
         return team?.teamName?.let {
             gameService.save(
                 teamName = it,
-                selected = event.message.text.toIntOrNull() ?: throw RuntimeException("!!! 숫자만 입력해 주세요.")
+                selected = event.message.text
             )
         }?.let {
             "${it.selected} 를 선택하셨네요 ^^ 결과를 기대해주세요 >_<"
@@ -123,7 +124,7 @@ class GameService(
     val gameRepository: GameRepository
 ) {
 
-    fun save(teamName: TeamName, selected: Int): Game {
+    fun save(teamName: TeamName, selected: String): Game {
         return gameRepository.save(
             Game(
                 turn = gameConfigService.currentTurn,
@@ -176,7 +177,7 @@ data class Team(
 data class GameConfig(
     @Id val turn: Int,
     val question: String,
-    val answer: Int
+    val answer: String
 )
 
 @Entity
@@ -184,7 +185,7 @@ data class GameConfig(
 data class Game(
     @Id val turn: Int,
     @Id val teamName: TeamName,
-    val selected: Int,
+    val selected: String,
     val updated: Date
 )
 

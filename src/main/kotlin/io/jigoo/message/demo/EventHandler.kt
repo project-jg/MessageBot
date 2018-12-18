@@ -94,7 +94,7 @@ class TeamController(private val teamService: TeamService) {
 class GameController(private val gameService: GameService) {
 
     @PostMapping("/turns/current/games")
-    fun save(teamName: TeamName, selected: Int): Game {
+    fun save(teamName: TeamName, selected: String): Game {
         return gameService.save(teamName = teamName, selected = selected)
     }
 
